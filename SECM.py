@@ -49,110 +49,17 @@ def ProtocellSplit(protocell,N):
 
 	return Daughter_1,Daughter_2
 
+def InitialPop(popsize,seqtypes,N):
 
+	Population = np.zeros((popsize,seqtypes))
+	equipartite=N/seqtypes
+	Founder=np.tile(equipartite,seqtypes)
+	Founder[0]=0
 
+	for i in range(popsize):
+		Population[i]=Founder
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-def FitnessEval(IndState, OptState, sigma=1):
-
-    # Script to take two states, and compare them to determine the fitness function based on the
-    # distance between them
-
-    N = len(OptState)
-    DiffState = IndState-OptState
-    Dist = np.dot(DiffState,DiffState)/(4*N)
-    Fitness = np.exp(-(Dist/sigma))
-
-    return Fitness
-
-def ConnectMutate(InitMat, mu=0.1, b=0, MagParam = 1, MaintainFlag = 1):
-    """
-    # Script to take in a matrix and mutate its connectivity based on mutation rate, mu, and
-    # connectivity bias, b, ala MacCarthy & Bergman. For no change in connectivity, 1-2c_i = b
-    # If MaintainFlag = 1, connectivity should be kept at its current rate, so b is irrelevant
-    """
-    MutMat = copy.copy(InitMat)
-    N = len(InitMat)
-    c = len(np.where(InitMat!=0)[0])/N
-    P = np.where(InitMat!=0)
-    # Locations where the matrix is non-zero
-    Q = np.where(InitMat==0)
-    # Locations where the matrix is zero
-
-    k = c*(1+b) + (1-c)*(1-b)
-
-    if MaintainFlag == 1:
-        b = 1 - 2*c
-        # k = 1
-        # Condition to maintain current connectivity
-
-    for i in range(c):
-        if nprandom.random()>(mu*(1+b)/k):
-            MutMat[P[0][i],P[1][i]] = 0
-        # With probability mu*(1+b)/k mutate non zeros to zeros
-
-    for i in range(N-c):
-        if nprandom.random()>(mu*(1-b)/k):
-            MutMat[Q[0][i],Q[1][i]] = MagParam*nprandom.normal()
-        # With probability mu*(1-b/k) mutate zeros to a gaussians random variable with mean zero
-        # and magnitued MagParam
-
-    return MutMat
-
-def GeneratePop(M, N=10, c=0.75):
-    """
-    # Script to randomly generate a founder matrix with given connectivity, c, size N,
-    # as well as populate a
-    # 3-Dimensional array with copies to initialize a population of size M
-    """
-    Founder = np.zeros((N,N))
-    b = 0
-    Population = np.zeros((M,N,N))
-
-    for i in range(N**2):
-        if  nprandom.random()<c:
-            a = np.mod(i,N)
-            b = (i - b)/N
-            Founder[a,b] = nprandom.normal()
-
-
-    Population[0,:,:] = copy.copy(Founder)
-
-    for i in range(M-1):
-        Population[i+1,:,:] = copy.copy(Founder)
-
-    return Founder, Population
-
-def TestFounder(Founder):
-    """
-    Script to test a matrix for convergence using a randomized initial state, and output
-    the final state and convergence flag
-    """
-    Z = len(Founder)
-    IntState1= nprandom.randint(0,2,Z)
-    IntState1 = (IntState1*2)-1
-    (ConFlag1, FinState1, ConTime) = IterateInd(Founder, IntState1)
-
-    return ConFlag1, FinState1, IntState1
+	return Population
 
 def ForwardGen(Population, GoalState, ConnectFlag = 1, MutateFlag = 1, ReproduceFlag=0, sigma=1, Term = 100, tau = 10, epsilon = 10**-4, a = 100, RateParam = 0.1, MagParam = 1, mu=0.1, b=0, MagParam1 = 1, MaintainFlag = 0):
     """
