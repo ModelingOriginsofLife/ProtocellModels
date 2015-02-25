@@ -38,13 +38,17 @@ def ProtocellSplit(protocell,N):
 
     global sum_daughter
     
+    sum_daughter=sum(Daughter_1)
+    
     while (sum_daughter != N):
         protocell=np.array(protocell,dtype=np.float)
         total=np.sum(protocell,dtype=np.float)
         protocell_freq=protocell/total
         values=np.arange(len(protocell))
         propia = sps.rv_discrete(name='propia', values=(values, protocell_freq))
-        R=0
+        R = propia.rvs(size=1)
+        R=R.tolist()
+        R=int(R[0])
 
         while (protocell[R] == 0):
 
@@ -125,6 +129,14 @@ def SimPop(NumGens,popsize,seqtypes,N,mu,L):
     Big Main
     """
 
+    # binary flags
+
+    plotreal = 0
+    plotend = 1
+    randenv = 0
+    saveplot = 1
+    showplot = 0
+
     #generate population with founder
 
     Population=InitialPop(popsize,seqtypes,N)
@@ -138,7 +150,34 @@ def SimPop(NumGens,popsize,seqtypes,N,mu,L):
         Population = ForwardGen(Population,mu,L,N)
         fitness_vec=Measures(Population)
         AvgPopFit[i] = np.mean(fitness_vec)
-    print AvgPopFit
+
+        # plot
+    # ============================
+    if plotend:
+        # make directory for figure output
+        if saveplot:
+            figdir = "fig"
+            if not os.path.exists(figdir):
+                os.makedirs(figdir)
+
+        #define font size
+        plt.rc("font", size=20)
+        plt.rc("text", usetex=True)
+
+        # figure(1)
+        fig1 = plt.figure(1)
+        f1p1 = plt.plot(AvgPopFit,linestyle='none',marker='o')
+
+        #To save to a multipage PDF
+        from matplotlib.backends.backend_pdf import PdfPages
+        pp = PdfPages(figdir + '/AvgPopFit.pdf')
+
+        if saveplot:
+            plt.savefig(pp,format='pdf')
+            if showplot:
+                plt.show()
+        #plt.close()
+        pp.close()
 
     return AvgPopFit, Population
 
@@ -167,7 +206,7 @@ if __name__ == "__main__":
     seqtypes=4
     N=200
     mu=0.00001
-    L=40
+    L=10
     test=0
     sum_daughter=0
 
