@@ -72,6 +72,9 @@ def InitialPop(popsize,seqtypes,N):
     equipartite=N/(seqtypes-1)
     Founder=np.tile(equipartite,seqtypes)
     Founder[0]=0
+    Reference=Founder[1:]
+    MaxFit=0
+    MaxFit=sps.gmean(Reference)
 
     if np.sum(Founder) < N:
         Diff=N-np.sum(Founder)
@@ -80,7 +83,8 @@ def InitialPop(popsize,seqtypes,N):
     for i in range(popsize):
         Population[i]=Founder
 
-    return Population
+
+    return Population,MaxFit
 
 def Fitness(Population):
 
@@ -119,8 +123,6 @@ def ForwardGen(Population,mu,L,N):
     Population[sample]=Sons[0]
     Population[R]=Sons[1]
 
-    "Measures"
-
     return Population
 
 
@@ -139,7 +141,9 @@ def SimPop(NumGens,popsize,seqtypes,N,mu,L):
 
     #generate population with founder
 
-    Population=InitialPop(popsize,seqtypes,N)
+    Population=InitialPop(popsize,seqtypes,N)[0]
+
+    MaxFit=InitialPop(popsize,seqtypes,N)[1]
 
     #evolve population for NumGens storing mean population fitness
 
@@ -149,7 +153,7 @@ def SimPop(NumGens,popsize,seqtypes,N,mu,L):
     for i in range(NumGens):
         Population = ForwardGen(Population,mu,L,N)
         fitness_vec=Measures(Population)
-        AvgPopFit[i] = np.mean(fitness_vec)
+        AvgPopFit[i] = np.mean(fitness_vec)/MaxFit
 
         # plot
     # ============================
@@ -183,6 +187,8 @@ def SimPop(NumGens,popsize,seqtypes,N,mu,L):
 
 
 if __name__ == "__main__":
+
+	
     #import doctest
     #doctest.testmod()
 
