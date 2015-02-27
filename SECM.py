@@ -9,6 +9,7 @@ import numpy.random as nprandom
 import scipy.stats as sps
 import copy
 import random as random
+import csv
 
 def SequenceDynSelf(protocell,mu,L,N):
 
@@ -148,12 +149,32 @@ def SimPop(NumGens,popsize,seqtypes,N,mu,L):
     #evolve population for NumGens storing mean population fitness
 
     AvgPopFit = np.zeros(NumGens)
+    CvPopFit = np.zeros(NumGens)
   
 
     for i in range(NumGens):
         Population = ForwardGen(Population,mu,L,N)
         fitness_vec=Measures(Population)
         AvgPopFit[i] = np.mean(fitness_vec)/MaxFit
+        CvPopFit[i] = np.std(fitness_vec)/np.mean(fitness_vec)
+
+
+        # Saving
+    # ============================
+
+    list1=list(AvgPopFit)
+    list2=list(CvPopFit)
+
+    rows=zip(list1,list2)
+
+    with open('Population_measures.csv', 'wb') as f:
+        writer = csv.writer(f)
+        for row in rows:
+            writer.writerow(row)
+
+    with open('Last_population.csv', 'wb') as f:
+        writer = csv.writer(f)
+        writer.writerow(Population)
 
         # plot
     # ============================
@@ -183,29 +204,13 @@ def SimPop(NumGens,popsize,seqtypes,N,mu,L):
         #plt.close()
         pp.close()
 
+
     return AvgPopFit, Population
 
 
 if __name__ == "__main__":
 
-	
-    #import doctest
-    #doctest.testmod()
-
-    #read in command line parameters
-    argv=sys.argv[1:]
-
-    NumGens = int(argv[0])
-    popsize=int(argv[1])
-    seqtypes=int(argv[2])
-    N=int(argv[3])
-    mu=float(argv[4])
-    L=int(argv[5])
-
-    SimPop(NumGens,popsize,seqtypes,N,mu,L)
-
-
-    # test
+	# test
 
     NumGens = 10
     popsize=100
@@ -215,7 +220,19 @@ if __name__ == "__main__":
     L=10
     test=0
     sum_daughter=0
+    #import doctest
+    #doctest.testmod()
+
+    #read in command line parameters
+    # argv=sys.argv[1:]
+
+    # NumGens = int(argv[0])
+    # popsize=int(argv[1])
+    # seqtypes=int(argv[2])
+    # N=int(argv[3])
+    # mu=float(argv[4])
+    # L=int(argv[5])
+
+    SimPop(NumGens,popsize,seqtypes,N,mu,L)
 
 
-protocell=[ 2,  7, 14, 12,  9, 11, 16, 11, 14, 11,  5,  6,  7,  8, 13, 10,  7,
-   ...:        19,  9,  9]
