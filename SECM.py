@@ -18,7 +18,17 @@ def SequenceDynSelf(protocell,mu,L,N):
     global test
 
     while (total != 2*N):
-        sample=random.randrange(0,seqtypes)
+
+    	"Pick the  sequence type"
+
+        sec_freq=protocell/total
+        values=np.arange(len(protocell))
+        custm = sps.rv_discrete(name='custm', values=(values, sec_freq))
+        R = custm.rvs(size=1)
+        R=R.tolist()
+        R=int(R[0])
+        sample=R
+        
         if sample == 0:
             protocell[0]=protocell[0]+1
             test = nprandom.binomial(1,q)
@@ -212,12 +222,12 @@ if __name__ == "__main__":
 
 	# test
 
-    NumGens = 10
+    NumGens = 1000
     popsize=100
     seqtypes=4
     N=200
-    mu=0.00001
-    L=10
+    mu=0.01
+    L=75
     test=0
     sum_daughter=0
     #import doctest
