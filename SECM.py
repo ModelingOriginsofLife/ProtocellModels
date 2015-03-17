@@ -19,7 +19,7 @@ def SequenceDynSelf(protocell,mu,L,N):
 
     while (total != 2*N):
 
-    	"Pick the  sequence type"
+        "Pick the  sequence type"
 
         sec_freq=protocell/total
         values=np.arange(len(protocell))
@@ -29,9 +29,10 @@ def SequenceDynSelf(protocell,mu,L,N):
         R=int(R[0])
         sample=R
         
+        test = nprandom.binomial(1,q)
+
         if sample == 0:
             protocell[0]=protocell[0]+1
-            test = nprandom.binomial(1,q)
         elif test == 1:
             protocell[sample]=protocell[sample]+1
         else:
@@ -99,12 +100,14 @@ def InitialPop(popsize,seqtypes,N):
 
 def Fitness(Population):
 
+    epsilon=0.001
+
     fitness_vec=np.zeros(len(Population))
 
     for i in range(len(Population)):
         Compute=Population[i]
         No_omega=Compute[1:]
-        fitness_vec[i]=sps.gmean(No_omega)
+        fitness_vec[i]=sps.gmean(No_omega)+epsilon
     return fitness_vec
 
 def Measures(Population):

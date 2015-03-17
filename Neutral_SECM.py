@@ -29,9 +29,10 @@ def SequenceDynSelf(protocell,mu,L,N):
         R=int(R[0])
         sample=R
 
+        test = nprandom.binomial(1,q)
+
         if sample == 0:
             protocell[0]=protocell[0]+1
-            test = nprandom.binomial(1,q)
         elif test == 1:
             protocell[sample]=protocell[sample]+1
         else:
