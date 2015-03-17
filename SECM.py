@@ -114,15 +114,27 @@ def Measures(Population):
 def ForwardGen(Population,mu,L,N):
 
     "Pick the protocell"
-
     fitness_vec=Fitness(Population)
     total=np.sum(fitness_vec,dtype=np.float)
-    fitness_freq=fitness_vec/total
-    values=np.arange(len(Population))
-    custm = sps.rv_discrete(name='custm', values=(values, fitness_freq))
-    R = custm.rvs(size=1)
-    R=R.tolist()
-    R=int(R[0])
+
+    if total == 0:
+    	fitness_vec=np.ones(len(Population))
+        total=np.sum(fitness_vec,dtype=np.float)
+        fitness_freq=fitness_vec/total
+        values=np.arange(len(Population))
+        custm = sps.rv_discrete(name='custm', values=(values, fitness_freq))
+        R = custm.rvs(size=1)
+        R=R.tolist()
+        R=int(R[0])
+    else:
+        fitness_vec=Fitness(Population)
+        total=np.sum(fitness_vec,dtype=np.float)
+        fitness_freq=fitness_vec/total
+        values=np.arange(len(Population))
+        custm = sps.rv_discrete(name='custm', values=(values, fitness_freq))
+        R = custm.rvs(size=1)
+        R=R.tolist()
+        R=int(R[0])
 
     "Moran Process"
 
@@ -222,12 +234,12 @@ if __name__ == "__main__":
 
 	# test
 
-    NumGens = 1000
+    NumGens = 100
     popsize=100
     seqtypes=4
     N=200
     mu=0.01
-    L=75
+    L=100
     test=0
     sum_daughter=0
     #import doctest

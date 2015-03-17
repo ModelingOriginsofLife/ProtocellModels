@@ -28,7 +28,7 @@ def SequenceDynSelf(protocell,mu,L,N):
         R=R.tolist()
         R=int(R[0])
         sample=R
-        
+
         if sample == 0:
             protocell[0]=protocell[0]+1
             test = nprandom.binomial(1,q)
@@ -99,8 +99,12 @@ def InitialPop(popsize,seqtypes,N):
 
 def Fitness(Population):
 
-    fitness_vec=np.ones(len(Population))
-    
+    fitness_vec=np.zeros(len(Population))
+
+    for i in range(len(Population)):
+        Compute=Population[i]
+        No_omega=Compute[1:]
+        fitness_vec[i]=sps.gmean(No_omega)
     return fitness_vec
 
 def Measures(Population):
@@ -111,7 +115,7 @@ def ForwardGen(Population,mu,L,N):
 
     "Pick the protocell"
 
-    fitness_vec=Fitness(Population)
+    fitness_vec=np.ones(len(Population))
     total=np.sum(fitness_vec,dtype=np.float)
     fitness_freq=fitness_vec/total
     values=np.arange(len(Population))
@@ -155,23 +159,23 @@ def SimPop(NumGens,popsize,seqtypes,N,mu,L):
     #evolve population for NumGens storing mean population fitness
 
     AvgPopFit = np.zeros(NumGens)
-    CvPopFit = np.zeros(NumGens)
+    #CvPopFit = np.zeros(NumGens)
   
 
     for i in range(NumGens):
         Population = ForwardGen(Population,mu,L,N)
         fitness_vec=Measures(Population)
         AvgPopFit[i] = np.mean(fitness_vec)/MaxFit
-        CvPopFit[i] = np.std(fitness_vec)/np.mean(fitness_vec)
+        #CvPopFit[i] = np.std(fitness_vec)/np.mean(fitness_vec)
 
 
         # Saving
     # ============================
 
     list1=list(AvgPopFit)
-    list2=list(CvPopFit)
+    #list2=list(CvPopFit)
 
-    rows=zip(list1,list2)
+    rows=zip(list1)
 
     with open('Population_measures.csv', 'wb') as f:
         writer = csv.writer(f)
@@ -223,7 +227,7 @@ if __name__ == "__main__":
     seqtypes=4
     N=200
     mu=0.00001
-    L=10
+    L=100
     test=0
     sum_daughter=0
     #import doctest
