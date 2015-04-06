@@ -15,7 +15,8 @@ end
 function dec2bin(N::Integer)
 
   # convert integer to boolean array
-  map(x->parse(Int,x),split(bits(N),""))
+  # map(x->parse(Int,x),split(bits(N),""))
+  map(x->parse(Bool,x[1]),split(bits(N),""))
 
 end
 
@@ -23,13 +24,11 @@ end
 function mutate(community::Array{Int64,1})
   newcommunity = zeros(community)
   for (indtype,indnum) in enumerate(community)
-    # binindtype = map(Bool,dec2bin(indtype-1)[end-GL+1:end])
-    binindtype = bits(indtype-1)[end-GL+1:end]
+    binindtype = bits(indtype-1)
+    # binindtype = BITSDICT[indtype]
     for j=1:indnum
       tempindtype = copy(binindtype)
-      # newindtype = bin2dec(mutate(tempindtype))
-      tempindtype=mutate(tempindtype)
-      # newcommunity[bin2dec(tempindtype)+1] += 1
+      tempindtype = mutate(tempindtype)
       newcommunity[parse(Int,tempindtype,2)+1] += 1
     end
   end
@@ -38,53 +37,21 @@ end
 
 
 function mutate(genome::ASCIIString)
-  idx = mutating(GL,MF)
+  # idx = mutating(GL,MF)
+  idx = mutating(GL,MF)+64-GL
   newgenome = ""
   if !isempty(idx)
-    for (i,bit) in enumerate(genome)
-      if i in idx
-        newgenome = string(newgenome,"0")
-      else
-        newgenome = string(newgenome,bit)
-      end
-    end
+    tempgenome = split(genome,"")
+    tempgenome[idx] = "0"
+    newgenome = join(tempgenome)
   else
     newgenome = genome
   end
   return newgenome
 end
 
-function mutate(genome::Array{Bool,1})
-    # deleterious mutation
-    idx = mutating(GL, MF)
-    switchoff(idx, genome)
-
-    # beneficial mutation
-    # idx = mutating(GL,MF)
-    # switchon(idx, c.genome)
-
-    # if rand() < MF
-    #     s = sign(rand() - 0.5)
-    #     c.wantSporeSize += s
-    # end
-end
-
 function mutating(n::Int64, f::Float64)
     find([x < y for (x,y) in zip(rand(n), f*ones(n))])
-end
-
-function switchoff(idx::Array{Int64}, gen::Array{Bool,1})
-    if !isempty(idx)
-        gen[idx] = false
-    end
-    gen
-end
-
-function switchon(idx::Array{Int64}, gen::Array{Bool,1})
-    if !isempty(idx)
-        gen[idx] = true
-    end
-    gen
 end
 
 function printarray(f,a)
@@ -116,7 +83,8 @@ function generation!(community,newpop,S,D)
   newcommunity = rand(Multinomial(N,propagule/M))
   newcommunity = mutate(newcommunity)
 
-  if bin2dec(map(Bool,sum(map(dec2bin,find(newcommunity)-1)))) == 2^GL - 1
+  # if bin2dec(map(Bool,sum(map(dec2bin,find(newcommunity)-1)))) == 2^GL - 1
+  if sum(find(newcommunity)-1) >= 2^GL - 1
       push!(newpop,newcommunity)
       S += 1
   else
@@ -126,6 +94,38 @@ function generation!(community,newpop,S,D)
   return(S,D)
 end
 
+function defglobalvars()
+  # Flags
+  global debugflag = false
+
+  # # Test Constants
+  # GL = 3   # number of potential genes in an individual
+  # N = 10   # number of individuals in a community
+  # P = 10    # number of communities
+
+  # MF = 0.01 # mutation rate
+  # M = 3    # number of individuals in a propagule
+  # G = 100   # number of generations
+  # T = 1  # number of trials
+
+  # GENUPDATE = 10 # number of generations between updates
+
+  # Run Constants
+  global GL = 10   # number of potential genes in an individual
+  global N = 100   # number of individuals in a community
+  global P = 100   # number of communities
+
+  global MF = 0.01 # mutation rate
+  global M = 15    # number of individuals in a propagule
+  global G = 1000  # number of generations
+  global T = 1   # number of trials
+
+  global GENUPDATE = 100 # number of generations between updates
+
+  # global BITSDICT = Dict([i => bits(i-1) for i=1:2^GL])
+
+  return 0
+end
 
 
 #----------------------------------
@@ -139,34 +139,7 @@ function main()
 #-----------------------------
 
 f = open("../log/survivalprob.log","w")
-
-# Flags
-global debugflag = false
-
-# # Test Constants
-# GL = 3   # number of potential genes in an individual
-# N = 10   # number of individuals in a community
-# P = 10    # number of communities
-
-# MF = 0.01 # mutation rate
-# M = 3    # number of individuals in a propagule
-# G = 100   # number of generations
-# T = 1  # number of trials
-
-# GENUPDATE = 10 # number of generations between updates
-
-# Run Constants
-global GL = 10   # number of potential genes in an individual
-global N = 100   # number of individuals in a community
-global P = 100   # number of communities
-
-global MF = 0.01 # mutation rate
-global M = 15    # number of individuals in a propagule
-global G = 5000  # number of generations
-global T = 10   # number of trials
-
-global GENUPDATE = 100 # number of generations between updates
-
+defglobalvars()
 
 survivalprobvec = zeros(T)
 
@@ -182,8 +155,6 @@ for i = 1:T
       printarray(f,pop)
     end
 
-    # community = rand(Multinomial(N,ones(2^GL)/(2^GL)))
-    # propagule = rand(Multinomial(M,ones(2^GL)/(2^GL)))
     S = 0
     D = 0
 
@@ -268,7 +239,7 @@ close(f)
 end
 
 # uncomment to run with
-# julia probmod.jl
+# julia survivalprobmod.jl
 #
 # main()
 
